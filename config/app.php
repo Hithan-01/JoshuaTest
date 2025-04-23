@@ -441,4 +441,15 @@ return [
         'safeTld' => env('DEBUG_KIT_SAFE_TLD', null),
         'ignoreAuthorization' => env('DEBUG_KIT_IGNORE_AUTHORIZATION', false),
     ],
+
+    /**
+     * TestSuite configuration.
+     *
+     * ## Options
+     *
+     *  - `fixtureStrategy` - Defaults to TruncateStrategy. Can be set to any class implementing FixtureStrategyInterface.
+     */
+    'TestSuite' => [
+        'fixtureStrategy' => null,
+    ],
 ];
