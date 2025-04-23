@@ -447,9 +447,11 @@ return [
      *
      * ## Options
      *
+     *  - `errorLevel` - Defaults to E_ALL.
      *  - `fixtureStrategy` - Defaults to TruncateStrategy. Can be set to any class implementing FixtureStrategyInterface.
      */
     'TestSuite' => [
+        'errorLevel' => null,
         'fixtureStrategy' => null,
     ],
 ];
