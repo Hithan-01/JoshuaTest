@@ -447,7 +447,7 @@ return [
      *
      * ## Options
      *
-     *  - `errorLevel` - Defaults to E_ALL.
+     *  - `errorLevel` - Defaults to `E_ALL`. Can be set to `false` to disable overwrite error level.
      *  - `fixtureStrategy` - Defaults to TruncateStrategy. Can be set to any class implementing FixtureStrategyInterface.
      */
     'TestSuite' => [
