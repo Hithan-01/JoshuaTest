@@ -49,7 +49,11 @@ class AppController extends Controller
             'add',
             'home',
             'display',
-            'createPlainUsers'  // Para el método de crear usuarios de prueba
+            'createPlainUsers',  // Para el método de crear usuarios de prueba
+            'disponibles', // Permitir acceso a la lista de exámenes disponibles
+            'debugExamenes',
+          
+            
         ]);
     }
 }
