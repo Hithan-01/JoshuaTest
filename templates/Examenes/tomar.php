@@ -1,155 +1,97 @@
 <?php
 /**
- * @var \App\View\AppView $this
- * @var \App\Model\Entity\Examenes $examen
+ * Vista para tomar examen - Una pregunta por vez
+ * templates/Examenes/tomar.php
  */
 ?>
 
 <div class="examen-container">
     <div class="examen-header">
-        <div class="header-content">
+        <div class="examen-info">
             <h2><?= h($examen->titulo) ?></h2>
-            <p class="description"><?= h($examen->descripcion ?: 'Responde todas las preguntas del examen') ?></p>
+            <p class="text-muted"><?= h($examen->descripcion) ?></p>
         </div>
-        <div class="header-info">
-            <span class="badge badge-info">
-                <?= count($examen->reactivos) ?> preguntas
+        <div class="progress-info">
+            <span class="question-counter">
+                <span id="current-question">1</span> de <?= count($examen->reactivos) ?> preguntas
             </span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
         </div>
     </div>
 
-    <?= $this->Form->create(null, ['type' => 'post', 'id' => 'examen-form']) ?>
-    
-    <div class="preguntas-container">
-        <?php if (!empty($examen->reactivos)): ?>
-            <?php foreach ($examen->reactivos as $index => $reactivo): ?>
-                <div class="pregunta-card" data-pregunta="<?= $index + 1 ?>">
-                    <div class="pregunta-header">
-                        <span class="pregunta-numero">Pregunta <?= $index + 1 ?></span>
+    <?= $this->Form->create(null, [
+        'id' => 'examen-form',
+        'url' => ['action' => 'tomar', $examen->id]
+    ]) ?>
+
+    <div class="questions-container">
+        <?php foreach ($examen->reactivos as $index => $reactivo): ?>
+            <div class="question-slide" data-question="<?= $index + 1 ?>" style="<?= $index === 0 ? '' : 'display: none;' ?>">
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-badge">Pregunta <?= $index + 1 ?></span>
                     </div>
                     
-                    <div class="pregunta-contenido">
-                        <h5 class="pregunta-texto"><?= h($reactivo->pregunta) ?></h5>
+                    <div class="question-content">
+                        <h4 class="question-text"><?= h($reactivo->pregunta) ?></h4>
                         
-                        <div class="opciones">
+                        <div class="answers-container">
                             <?php 
-                            // Usar solo las 3 opciones que tienes en tu BD
                             $opciones = [
                                 'A' => $reactivo->respuesta_a,
                                 'B' => $reactivo->respuesta_b, 
-                                'C' => $reactivo->respuesta_c
+                                'C' => $reactivo->respuesta_c,
+                                'D' => $reactivo->respuesta_d ?? null
                             ];
+                            ?>
                             
-                            foreach ($opciones as $letra => $texto): 
-                                if (!empty($texto) && trim($texto) !== ''): ?>
-                                <div class="opcion-item">
-                                    <label class="opcion-label">
-                                        <input type="radio" 
-                                               name="respuestas[<?= $reactivo->id ?>]" 
-                                               value="<?= $letra ?>" 
-                                               class="opcion-radio">
-                                        <span class="opcion-letra"><?= $letra ?></span>
-                                        <span class="opcion-texto"><?= h($texto) ?></span>
+                            <?php foreach ($opciones as $letra => $respuesta): ?>
+                                <?php if (!empty($respuesta)): ?>
+                                    <label class="answer-option">
+                                        <?= $this->Form->radio(
+                                            "respuestas[{$reactivo->id}]",
+                                            [
+                                                $letra => ''
+                                            ],
+                                            [
+                                                'hiddenField' => false,
+                                                'class' => 'answer-radio'
+                                            ]
+                                        ) ?>
+                                        <span class="answer-letter"><?= $letra ?></span>
+                                        <span class="answer-text"><?= h($respuesta) ?></span>
                                     </label>
-                                </div>
-                            <?php endif; 
-                            endforeach; ?>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
-            
-            <div class="examen-footer">
-                <div class="footer-actions">
-                    <?= $this->Html->link(
-                        '<i class="fas fa-arrow-left"></i> Volver a Exámenes',
-                        ['action' => 'disponibles'],
-                        ['class' => 'btn btn-secondary', 'escape' => false]
-                    ) ?>
-                    
-                    <?= $this->Form->button(
-                        '<i class="fas fa-paper-plane"></i> Enviar Examen',
-                        [
-                            'type' => 'submit',
-                            'class' => 'btn btn-success',
-                            'escape' => false,
-                            'id' => 'enviar-examen'
-                        ]
-                    ) ?>
-                </div>
-                
-                <div class="progreso-container">
-                    <div class="progreso-info">
-                        <span id="preguntas-respondidas">0</span> de <?= count($examen->reactivos) ?> preguntas respondidas
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                    </div>
-                </div>
             </div>
-            
-        <?php else: ?>
-            <div class="alert alert-warning">
-                <h5><i class="fas fa-exclamation-triangle"></i> Este examen no tiene preguntas</h5>
-                <p>Este examen no tiene preguntas disponibles. Contacta con el administrador para más información.</p>
-                <?= $this->Html->link(
-                    'Volver a Exámenes',
-                    ['action' => 'disponibles'],
-                    ['class' => 'btn btn-primary']
-                ) ?>
-            </div>
-        <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="navigation-controls">
+        <button type="button" id="prev-btn" class="btn btn-outline-secondary" disabled>
+            ← Anterior
+        </button>
+        
+        <button type="button" id="next-btn" class="btn btn-primary">
+            Siguiente →
+        </button>
+        
+        <button type="submit" id="submit-btn" class="btn btn-success" style="display: none;">
+            Finalizar Examen
+        </button>
     </div>
 
     <?= $this->Form->end() ?>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('examen-form');
-    const radios = document.querySelectorAll('.opcion-radio');
-    const totalPreguntas = <?= count($examen->reactivos) ?>;
-    
-    function actualizarProgreso() {
-        const preguntasRespondidas = new Set();
-        
-        radios.forEach(radio => {
-            if (radio.checked) {
-                const nombrePregunta = radio.name;
-                preguntasRespondidas.add(nombrePregunta);
-            }
-        });
-        
-        const respondidas = preguntasRespondidas.size;
-        const porcentaje = totalPreguntas > 0 ? (respondidas / totalPreguntas) * 100 : 0;
-        
-        document.getElementById('preguntas-respondidas').textContent = respondidas;
-        document.querySelector('.progress-bar').style.width = porcentaje + '%';
-    }
-    
-    radios.forEach(radio => {
-        radio.addEventListener('change', actualizarProgreso);
-    });
-    
-    form.addEventListener('submit', function(e) {
-        const respondidas = document.querySelectorAll('.opcion-radio:checked').length;
-        
-        if (respondidas === 0) {
-            e.preventDefault();
-            alert('Debes responder al menos una pregunta antes de enviar el examen.');
-            return;
-        }
-        
-        if (!confirm('¿Estás seguro de que quieres enviar el examen? No podrás modificar tus respuestas después.')) {
-            e.preventDefault();
-        }
-    });
-});
-</script>
-
 <style>
 .examen-container {
-    max-width: 900px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -160,179 +102,189 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 30px;
     border-radius: 12px;
     margin-bottom: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
-.header-content h2 {
+.examen-info h2 {
     margin: 0 0 10px 0;
     font-weight: 600;
 }
 
-.description {
-    margin: 0;
-    opacity: 0.9;
+.progress-info {
+    margin-top: 20px;
 }
 
-.badge-info {
-    background-color: rgba(255,255,255,0.2);
-    color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 14px;
+.question-counter {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
 }
 
-.pregunta-card {
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
     background: #fff;
-    border: 2px solid #e9ecef;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.questions-container {
+    min-height: 400px;
+    margin-bottom: 30px;
+}
+
+.question-slide {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.question-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
     border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.pregunta-header {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e9ecef;
+.question-header {
+    background: #f8f9fa;
+    padding: 15px 25px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.pregunta-numero {
+.question-badge {
     background: #667eea;
     color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: 500;
 }
 
-.pregunta-texto {
+.question-content {
+    padding: 25px;
+}
+
+.question-text {
     color: #333;
-    margin-bottom: 20px;
-    font-weight: 600;
+    font-weight: 500;
+    margin-bottom: 25px;
     line-height: 1.6;
 }
 
-.opciones {
-    margin-left: 10px;
+.answers-container {
+    space-y: 12px;
 }
 
-.opcion-item {
-    margin-bottom: 15px;
-}
-
-.opcion-label {
+.answer-option {
     display: flex;
     align-items: center;
     padding: 15px;
-    border: 2px solid #e9ecef;
+    border: 2px solid #e0e0e0;
     border-radius: 8px;
+    margin-bottom: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
     background: #fff;
 }
 
-.opcion-label:hover {
+.answer-option:hover {
     border-color: #667eea;
-    background-color: #f8f9ff;
+    background: #f8f9ff;
 }
 
-.opcion-radio {
+.answer-option:has(.answer-radio:checked) {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+.answer-radio {
     margin-right: 15px;
+    transform: scale(1.2);
 }
 
-.opcion-letra {
-    background: #667eea;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
+.answer-letter {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
     font-weight: 600;
     margin-right: 15px;
-    flex-shrink: 0;
+    font-size: 0.9em;
 }
 
-.opcion-texto {
+.answer-option:has(.answer-radio:checked) .answer-letter {
+    background: #5a67d8;
+}
+
+.answer-text {
     flex: 1;
-    line-height: 1.5;
+    font-weight: 500;
+    color: #444;
 }
 
-.opcion-radio:checked + .opcion-letra {
-    background: #28a745;
-}
-
-.examen-footer {
-    background: #f8f9fa;
-    padding: 25px;
-    border-radius: 12px;
-    margin-top: 30px;
-}
-
-.footer-actions {
+.navigation-controls {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    align-items: center;
+    padding: 20px 0;
 }
 
 .btn {
     padding: 12px 25px;
     border-radius: 8px;
     font-weight: 600;
-    text-decoration: none;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.btn-secondary {
-    background-color: #6c757d;
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+    background: #6c757d;
     color: white;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5a67d8;
 }
 
 .btn-success {
-    background-color: #28a745;
+    background: #28a745;
     color: white;
 }
 
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+.btn-success:hover {
+    background: #218838;
 }
 
-.progreso-container {
-    text-align: center;
-}
-
-.progreso-info {
-    margin-bottom: 10px;
-    font-weight: 600;
-    color: #666;
-}
-
-.progress {
-    height: 8px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    transition: width 0.3s ease;
-}
-
-.alert-warning {
-    background-color: #fff3cd;
-    border: 1px solid #ffeaa7;
-    color: #856404;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 10px 0;
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
@@ -341,18 +293,82 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     .examen-header {
-        flex-direction: column;
-        text-align: center;
         padding: 20px;
     }
     
-    .header-info {
-        margin-top: 15px;
+    .question-content {
+        padding: 20px;
     }
     
-    .footer-actions {
+    .navigation-controls {
         flex-direction: column;
         gap: 10px;
     }
+    
+    .btn {
+        width: 100%;
+    }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const totalQuestions = <?= count($examen->reactivos) ?>;
+    let currentQuestion = 1;
+    
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const currentQuestionSpan = document.getElementById('current-question');
+    const progressFill = document.getElementById('progress-fill');
+    
+    function updateProgress() {
+        const progress = (currentQuestion / totalQuestions) * 100;
+        progressFill.style.width = progress + '%';
+        currentQuestionSpan.textContent = currentQuestion;
+    }
+    
+    function showQuestion(questionNum) {
+        // Ocultar todas las preguntas
+        document.querySelectorAll('.question-slide').forEach(slide => {
+            slide.style.display = 'none';
+        });
+        
+        // Mostrar la pregunta actual
+        const currentSlide = document.querySelector(`[data-question="${questionNum}"]`);
+        if (currentSlide) {
+            currentSlide.style.display = 'block';
+        }
+        
+        // Actualizar botones
+        prevBtn.disabled = questionNum === 1;
+        
+        if (questionNum === totalQuestions) {
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'inline-block';
+        } else {
+            nextBtn.style.display = 'inline-block';
+            submitBtn.style.display = 'none';
+        }
+        
+        updateProgress();
+    }
+    
+    prevBtn.addEventListener('click', function() {
+        if (currentQuestion > 1) {
+            currentQuestion--;
+            showQuestion(currentQuestion);
+        }
+    });
+    
+    nextBtn.addEventListener('click', function() {
+        if (currentQuestion < totalQuestions) {
+            currentQuestion++;
+            showQuestion(currentQuestion);
+        }
+    });
+    
+    // Inicializar
+    showQuestion(1);
+});
+</script>
