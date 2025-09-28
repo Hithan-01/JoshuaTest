@@ -27,10 +27,10 @@
   * - onlyCli: Load the plugin only in CLI mode. Default false.
   * - optional: Do not throw an exception if the plugin is not found. Default false.
   */
-return [
-    'DebugKit' => ['onlyDebug' => true],
-    'Bake' => ['onlyCli' => true, 'optional' => true],
-    'Migrations' => ['onlyCli' => true],
+// return [
+//     'DebugKit' => ['onlyDebug' => true],
+//     'Bake' => ['onlyCli' => true, 'optional' => true],
+//     'Migrations' => ['onlyCli' => true],
 
-    // Additional plugins here
-];
+//     // Additional plugins here
+// ];
