@@ -25,7 +25,7 @@ use Cake\Routing\Router;
 
 class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
-  public function bootstrap(): void
+public function bootstrap(): void
 {
     parent::bootstrap();
 
@@ -33,10 +33,11 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         FactoryLocator::add('Table', (new TableLocator())->allowFallbackClass(false));
     }
 
+    // Cargar plugins
     $this->addPlugin('Authentication');
 
-    // DebugKit solo si estamos en modo debug
-    if (Configure::read('debug')) {
+    // ⚠️ DebugKit solo en local
+    if (Configure::read('debug') && env('RAILWAY_ENVIRONMENT', 'production') !== 'production') {
         $this->addPlugin('DebugKit');
     }
 }
