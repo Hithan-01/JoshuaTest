@@ -171,7 +171,7 @@ return [
      *   your application that still emit deprecations.
      */
     'Error' => [
-        'errorLevel' => E_ALL,
+           'errorLevel' => E_ALL & ~E_USER_DEPRECATED,
         'skipLog' => [],
         'log' => true,
         'trace' => true,
@@ -268,16 +268,26 @@ return [
      *   E.g set it to 'utf8mb4' in MariaDB and MySQL and 'utf8' for any
      *   other RDBMS.
      */
-  'Datasources' => [
+ 'Datasources' => [
     'default' => [
-        'className' => Connection::class,
-        'driver' => 'Cake\Database\Driver\Sqlite',
+        'className' => \Cake\Database\Connection::class,
+        'driver' => \Cake\Database\Driver\Postgres::class,
         'persistent' => false,
+        'host' => env('PGHOST', 'localhost'),
+        'port' => env('PGPORT', 5432),
+        'username' => env('PGUSER', 'postgres'),
+        'password' => env('PGPASSWORD', 'secret'),
+        'database' => env('PGDATABASE', 'railway'),
+        'schema' => 'public',
         'encoding' => 'utf8',
-        'database' => env('DATABASE_URL', '/var/www/html/tmp/database.sqlite'),
+        'timezone' => 'UTC',
         'cacheMetadata' => true,
         'log' => false,
+        'quoteIdentifiers' => false,
+        'url' => env('DATABASE_URL', null),
     ],
+
+
 
         /*
          * The test connection is used during the test suite.
