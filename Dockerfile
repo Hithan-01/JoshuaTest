@@ -20,8 +20,8 @@ RUN a2enmod rewrite
 COPY . /var/www/html/
 WORKDIR /var/www/html
 
-# Instalar dependencias con menos restricciones
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+# Instalar TODAS las dependencias (incluyendo dev)
+RUN composer install --optimize-autoloader --ignore-platform-reqs
 
 # Configurar permisos
 RUN chown -R www-data:www-data logs tmp
