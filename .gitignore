@@ -1,4 +1,9 @@
-logs/* 
-tmp/* 
-config/app_local.php 
-.env 
+ 
+/vendor/
+/logs/
+/tmp/
+/config/.env
+/config/app_local.php
+/phpunit.xml
+/coverage/
+
