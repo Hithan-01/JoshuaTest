@@ -278,25 +278,16 @@ return [
         'log' => false,
     ],
 
-
-
-
-        /*
-         * The test connection is used during the test suite.
-         */
-        'test' => [
-            'className' => Connection::class,
-            'driver' => Mysql::class,
-            'persistent' => false,
-            'timezone' => 'UTC',
-            'encoding' => 'utf8mb4',
-            'flags' => [],
-            'cacheMetadata' => true,
-            'quoteIdentifiers' => false,
-            'log' => false,
-            //'init' => ['SET GLOBAL innodb_stats_on_metadata = 0'],
-        ],
+    'test' => [
+        'url' => env('DATABASE_TEST_URL', 'sqlite://127.0.0.1/tests.sqlite'),
+        'schema' => 'public',
+        'encoding' => 'utf8',
+        'timezone' => 'UTC',
+        'cacheMetadata' => true,
+        'log' => false,
     ],
+],
+
 
     /*
      * Configures logging options
