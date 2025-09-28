@@ -38,7 +38,63 @@ class UsersTable extends Table
         parent::initialize($config);
 
         $this->setTable('users');
-        $this->setDisplayField('id');
+        $this->setDisplayField('email'); // Cambiar a email es más útil
         $this->setPrimaryKey('id');
+
+        // IMPORTANTE: Agregar estos behaviors
+        $this->addBehavior('Authentication.Password'); // Para hashear passwords automáticamente
+        $this->addBehavior('Timestamp'); // Para created/modified automático
+    }
+
+    /**
+     * Default validation rules.
+     *
+     * @param \Cake\Validation\Validator $validator Validator instance.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationDefault(Validator $validator): Validator
+    {
+        $validator
+            ->integer('id')
+            ->allowEmptyString('id', null, 'create');
+
+        $validator
+            ->email('email')
+            ->requirePresence('email', 'create')
+            ->notEmptyString('email')
+            ->add('email', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
+
+        $validator
+            ->scalar('password')
+            ->maxLength('password', 255)
+            ->requirePresence('password', 'create')
+            ->notEmptyString('password')
+            ->minLength('password', 6, 'La contraseña debe tener al menos 6 caracteres');
+
+        $validator
+            ->scalar('role')
+            ->requirePresence('role', 'create')
+            ->notEmptyString('role')
+            ->inList('role', ['admin', 'estudiante'], 'El rol debe ser admin o estudiante');
+
+        $validator
+            ->boolean('active')
+            ->notEmptyString('active');
+
+        return $validator;
+    }
+
+    /**
+     * Returns a rules checker object that will be used for validating
+     * application integrity.
+     *
+     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+     * @return \Cake\ORM\RulesChecker
+     */
+    public function buildRules(RulesChecker $rules): RulesChecker
+    {
+        $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
+
+        return $rules;
     }
 }

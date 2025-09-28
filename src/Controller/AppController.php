@@ -4,31 +4,45 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Cake\Controller\Controller;
-use Cake\Event\EventInterface;
 
+/**
+ * Application Controller
+ *
+ * Add your application-wide methods in the class below, your controllers
+ * will inherit them.
+ *
+ * @link https://book.cakephp.org/5/en/controllers.html#the-app-controller
+ */
 class AppController extends Controller
 {
+    /**
+     * Initialization hook method.
+     *
+     * Use this method to add common initialization code like loading components.
+     *
+     * e.g. `$this->loadComponent('FormProtection');`
+     *
+     * @return void
+     */
     public function initialize(): void
     {
         parent::initialize();
 
-        // ✅ Cargar Flash
         $this->loadComponent('Flash');
+        $this->loadComponent('Authentication.Authentication'); // IMPORTANTE
 
-        // ✅ Cargar Authentication
-        $this->loadComponent('Authentication.Authentication');
+        /*
+         * Enable the following component for recommended CakePHP form protection settings.
+         * see https://book.cakephp.org/5/en/controllers/components/form-protection.html
+         */
+        //$this->loadComponent('FormProtection');
     }
 
-    public function beforeFilter(EventInterface $event)
+    public function beforeFilter(\Cake\Event\EventInterface $event)
     {
         parent::beforeFilter($event);
-
-        // ✅ Ahora sí funciona porque $this->Authentication existe
-        $this->Authentication->allowUnauthenticated([
-            'login',
-            'add',
-            'home',
-            'display'
-        ]);
+        
+        // Permitir acceso a login y register sin autenticación
+        $this->Authentication->addUnauthenticatedActions(['login', 'register']);
     }
 }
