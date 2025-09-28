@@ -268,24 +268,16 @@ return [
      *   E.g set it to 'utf8mb4' in MariaDB and MySQL and 'utf8' for any
      *   other RDBMS.
      */
- 'Datasources' => [
+'Datasources' => [
     'default' => [
-        'className' => \Cake\Database\Connection::class,
-        'driver' => \Cake\Database\Driver\Postgres::class,
-        'persistent' => false,
-        'host' => env('PGHOST', 'localhost'),
-        'port' => env('PGPORT', 5432),
-        'username' => env('PGUSER', 'postgres'),
-        'password' => env('PGPASSWORD', 'secret'),
-        'database' => env('PGDATABASE', 'railway'),
+        'url' => env('DATABASE_URL', null),
         'schema' => 'public',
         'encoding' => 'utf8',
         'timezone' => 'UTC',
         'cacheMetadata' => true,
         'log' => false,
-        'quoteIdentifiers' => false,
-        'url' => env('DATABASE_URL', null),
     ],
+
 
 
 
