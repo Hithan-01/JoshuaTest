@@ -79,7 +79,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 
                 // Verificar si existe y la contraseña coincide exactamente (texto plano)
                 if ($user && $user->password === $data['password']) {
-                    return $user->toArray();
+                    return $user; // Retornar la Entity directamente, no el array
                 }
                 
                 return null;
