@@ -25,16 +25,22 @@ use Cake\Routing\Router;
 
 class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
-    public function bootstrap(): void
-    {
-        parent::bootstrap();
+  public function bootstrap(): void
+{
+    parent::bootstrap();
 
-        if (PHP_SAPI !== 'cli') {
-            FactoryLocator::add('Table', (new TableLocator())->allowFallbackClass(false));
-        }
-
-        $this->addPlugin('Authentication');
+    if (PHP_SAPI !== 'cli') {
+        FactoryLocator::add('Table', (new TableLocator())->allowFallbackClass(false));
     }
+
+    $this->addPlugin('Authentication');
+
+    // DebugKit solo si estamos en modo debug
+    if (Configure::read('debug')) {
+        $this->addPlugin('DebugKit');
+    }
+}
+
 
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
