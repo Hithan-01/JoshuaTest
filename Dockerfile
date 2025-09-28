@@ -1,11 +1,12 @@
 FROM php:8.1-apache
 
-# Instalar dependencias del sistema
+# Instalar dependencias del sistema incluyendo SQLite
 RUN apt-get update && apt-get install -y \
     libicu-dev \
     libzip-dev \
+    libsqlite3-dev \
     unzip \
-    && docker-php-ext-install intl pdo pdo_mysql
+    && docker-php-ext-install intl pdo pdo_mysql pdo_sqlite
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -20,11 +21,12 @@ RUN a2enmod rewrite
 COPY . /var/www/html/
 WORKDIR /var/www/html
 
-# Instalar TODAS las dependencias (incluyendo dev)
+# Instalar dependencias
 RUN composer install --optimize-autoloader --ignore-platform-reqs
 
-# Configurar permisos
-RUN chown -R www-data:www-data logs tmp
-RUN chmod -R 775 logs tmp
+# Crear directorio para SQLite y dar permisos
+RUN mkdir -p /var/www/html/tmp && \
+    chown -R www-data:www-data logs tmp && \
+    chmod -R 775 logs tmp
 
 EXPOSE 80
