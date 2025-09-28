@@ -71,12 +71,18 @@ public function getAuthenticationService(ServerRequestInterface $request): Authe
         'queryParam' => 'redirect',
     ]);
 
-    // Identificador: email + password
+    // Identificador: email + password SIN HASH (texto plano)
     $service->loadIdentifier('Authentication.Password', [
         'fields' => [
             'username' => 'email',
             'password' => 'password',
         ],
+        'resolver' => [
+            'className' => 'Authentication.Orm',
+            'userModel' => 'Users',
+            'finder' => 'all'
+        ],
+        'passwordHasher' => false  // DESACTIVAR HASH - usar texto plano
     ]);
 
     // Autenticadores

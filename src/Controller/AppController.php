@@ -42,7 +42,14 @@ class AppController extends Controller
     {
         parent::beforeFilter($event);
         
-        // Permitir acceso a login y register sin autenticación
-        $this->Authentication->addUnauthenticatedActions(['login', 'register']);
+        // Permitir acceso sin autenticación a estas acciones
+        $this->Authentication->addUnauthenticatedActions([
+            'login',
+            'register', 
+            'add',
+            'home',
+            'display',
+            'createPlainUsers'  // Para el método de crear usuarios de prueba
+        ]);
     }
 }
