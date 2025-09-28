@@ -25,20 +25,17 @@ use Cake\Routing\Router;
 
 class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
-public function bootstrap(): void
-{
-    parent::bootstrap();
+    public function bootstrap(): void
+    {
+        parent::bootstrap();
 
-    if (PHP_SAPI !== 'cli') {
-        FactoryLocator::add('Table', (new TableLocator())->allowFallbackClass(false));
+        if (PHP_SAPI !== 'cli') {
+            FactoryLocator::add('Table', (new TableLocator())->allowFallbackClass(false));
+        }
+
+        // Cargar plugins
+        $this->addPlugin('Authentication');
     }
-
-    // Cargar plugins
-    $this->addPlugin('Authentication');
-
-    
-}
-
 
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
@@ -49,7 +46,7 @@ public function bootstrap(): void
             ]))
             ->add(new RoutingMiddleware($this))
             ->add(new BodyParserMiddleware())
-            ->add(new AuthenticationMiddleware($this)) // 👈 Importante
+            ->add(new AuthenticationMiddleware($this))
             ->add(new CsrfProtectionMiddleware([
                 'httponly' => true,
             ]));
@@ -61,41 +58,44 @@ public function bootstrap(): void
     {
     }
 
-public function getAuthenticationService(ServerRequestInterface $request): AuthenticationServiceInterface
-{
-    $service = new AuthenticationService();
+    public function getAuthenticationService(ServerRequestInterface $request): AuthenticationServiceInterface
+    {
+        $service = new AuthenticationService();
 
-    // Si no está autenticado, redirigir al login
-    $service->setConfig([
-        'unauthenticatedRedirect' => Router::url(['controller' => 'Users', 'action' => 'login']),
-        'queryParam' => 'redirect',
-    ]);
+        // Si no está autenticado, redirigir al login
+        $service->setConfig([
+            'unauthenticatedRedirect' => Router::url(['controller' => 'Users', 'action' => 'login']),
+            'queryParam' => 'redirect',
+        ]);
 
-    // Identificador: email + password SIN HASH (texto plano)
-    $service->loadIdentifier('Authentication.Password', [
-        'fields' => [
-            'username' => 'email',
-            'password' => 'password',
-        ],
-        'resolver' => [
-            'className' => 'Authentication.Orm',
-            'userModel' => 'Users',
-            'finder' => 'all'
-        ],
-        'passwordHasher' => false  // DESACTIVAR HASH - usar texto plano
-    ]);
+        // Identificador: comparación directa sin hash
+        $service->loadIdentifier('Authentication.Callback', [
+            'callback' => function($data) {
+                // Buscar usuario por email
+                $usersTable = \Cake\ORM\TableRegistry::getTableLocator()->get('Users');
+                $user = $usersTable->find()
+                    ->where(['email' => $data['username']])
+                    ->first();
+                
+                // Verificar si existe y la contraseña coincide exactamente (texto plano)
+                if ($user && $user->password === $data['password']) {
+                    return $user->toArray();
+                }
+                
+                return null;
+            }
+        ]);
 
-    // Autenticadores
-    $service->loadAuthenticator('Authentication.Session');
-    $service->loadAuthenticator('Authentication.Form', [
-        'fields' => [
-            'username' => 'email',
-            'password' => 'password',
-        ],
-        'loginUrl' => Router::url(['controller' => 'Users', 'action' => 'login']),
-    ]);
+        // Autenticadores
+        $service->loadAuthenticator('Authentication.Session');
+        $service->loadAuthenticator('Authentication.Form', [
+            'fields' => [
+                'username' => 'email',
+                'password' => 'password',
+            ],
+            'loginUrl' => Router::url(['controller' => 'Users', 'action' => 'login']),
+        ]);
 
-    return $service;
-}
-
+        return $service;
+    }
 }
