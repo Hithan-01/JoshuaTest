@@ -115,7 +115,7 @@ class UsersController extends AppController
         // Crear usuarios con contraseñas en texto plano
         $users = [
             [
-                'email' => 'admin@test.com',
+                'email' => 'admin@example.com',
                 'password' => '1234',  // Texto plano
                 'role' => 'admin',
                 'active' => true,
@@ -123,7 +123,7 @@ class UsersController extends AppController
                 'modified' => date('Y-m-d H:i:s')
             ],
             [
-                'email' => 'estudiante@test.com', 
+                'email' => 'estudiante@gmail.com', 
                 'password' => '1234',  // Texto plano
                 'role' => 'estudiante',
                 'active' => true,
@@ -131,7 +131,7 @@ class UsersController extends AppController
                 'modified' => date('Y-m-d H:i:s')
             ],
             [
-                'email' => 'admin@example.com',
+                'email' => 'admin@test.com',
                 'password' => '1234',  // Texto plano
                 'role' => 'admin',
                 'active' => true,
@@ -161,9 +161,9 @@ class UsersController extends AppController
         
         echo '<div style="background: #fff3cd; padding: 20px; border: 1px solid #ffeaa7; margin: 20px 0;">';
         echo '<h3>Credenciales de prueba:</h3>';
-        echo '<p><strong>Admin 1:</strong> admin@test.com / 1234</p>';
-        echo '<p><strong>Admin 2:</strong> admin@example.com / 1234</p>';
-        echo '<p><strong>Estudiante:</strong> estudiante@test.com / 1234</p>';
+        echo '<p><strong>Admin 1:</strong> admin@example.com / 1234</p>';
+        echo '<p><strong>Admin 2:</strong> admin@test.com / 1234</p>';
+        echo '<p><strong>Estudiante:</strong> estudiante@gmail.com / 1234</p>';
         echo '<p><em>Todas las contraseñas son: <strong>1234</strong></em></p>';
         echo '</div>';
         
