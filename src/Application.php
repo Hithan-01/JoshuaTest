@@ -36,10 +36,7 @@ public function bootstrap(): void
     // Cargar plugins
     $this->addPlugin('Authentication');
 
-    // ⚠️ DebugKit solo en local
-    if (Configure::read('debug') && env('RAILWAY_ENVIRONMENT', 'production') !== 'production') {
-        $this->addPlugin('DebugKit');
-    }
+    
 }
 
 
