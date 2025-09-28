@@ -26,9 +26,9 @@ WORKDIR /var/www/html
 RUN composer install --optimize-autoloader --no-interaction --no-scripts --no-dev
 
 # Crear directorios necesarios y dar permisos
-RUN mkdir -p /var/www/html/tmp && \
-    chown -R www-data:www-data logs tmp && \
-    chmod -R 775 logs tmp
+RUN mkdir -p /var/www/html/tmp /var/www/html/logs && \
+    chown -R www-data:www-data /var/www/html/logs /var/www/html/tmp && \
+    chmod -R 775 /var/www/html/logs /var/www/html/tmp
 
 EXPOSE 80
 
