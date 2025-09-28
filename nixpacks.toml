@@ -1,8 +1,18 @@
-[phases.setup] 
-nixPkgs = ['php82', 'php82Extensions.intl', 'php82Extensions.mbstring', 'php82Extensions.pdo', 'php82Extensions.pdo_mysql', 'php82Extensions.openssl', 'php82Extensions.zip'] 
- 
-[phases.build] 
-cmds = ['composer install --no-dev --optimize-autoloader --ignore-platform-reqs'] 
- 
-[start] 
-cmd = 'vendor/bin/heroku-php-apache2 webroot/' 
+[phases.setup]
+nixPkgs = [
+  "php82",
+  "php82Extensions.intl",
+  "php82Extensions.mbstring",
+  "php82Extensions.pdo",
+  "php82Extensions.pdo_mysql",
+  "php82Extensions.openssl",
+  "php82Extensions.zip"
+]
+
+[phases.build]
+cmds = [
+  "composer install --no-dev --optimize-autoloader"
+]
+
+[start]
+cmd = "vendor/bin/heroku-php-apache2 webroot/"
