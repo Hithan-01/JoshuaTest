@@ -15,6 +15,6 @@ cmds = [
 ]
 
 [start]
-cmd = "vendor/bin/heroku-php-apache2 webroot/"
+cmd = "apache2-foreground"
 
 providers = ["php"]
