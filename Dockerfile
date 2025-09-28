@@ -1,12 +1,13 @@
 FROM php:8.1-apache
 
-# Instalar dependencias del sistema incluyendo SQLite
+# Instalar dependencias del sistema necesarias para PostgreSQL y otras extensiones
 RUN apt-get update && apt-get install -y \
     libicu-dev \
     libzip-dev \
-    libsqlite3-dev \
+    libpq-dev \
     unzip \
-    && docker-php-ext-install intl pdo pdo_mysql pdo_sqlite
+    git \
+    && docker-php-ext-install intl pdo pdo_mysql pdo_pgsql pgsql
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -21,12 +22,14 @@ RUN a2enmod rewrite
 COPY . /var/www/html/
 WORKDIR /var/www/html
 
-# Instalar dependencias
-RUN composer install --optimize-autoloader --ignore-platform-reqs
+# Instalar dependencias PHP con Composer
+RUN composer install --optimize-autoloader --no-interaction --no-scripts --no-dev
 
-# Crear directorio para SQLite y dar permisos
+# Crear directorios necesarios y dar permisos
 RUN mkdir -p /var/www/html/tmp && \
     chown -R www-data:www-data logs tmp && \
     chmod -R 775 logs tmp
 
 EXPOSE 80
+
+CMD ["apache2-foreground"]
