@@ -6,11 +6,6 @@
     "homepage": "https://cakephp.org",
     "require": {
         "php": ">=8.1",
-        "ext-intl": "*",
-        "ext-mbstring": "*",
-        "ext-openssl": "*",
-        "ext-pdo": "*",
-        "ext-pdo_mysql": "*",
         "cakephp/authentication": "^3.3",
         "cakephp/cakephp": "5.2.*",
         "cakephp/migrations": "^4.0.0",
