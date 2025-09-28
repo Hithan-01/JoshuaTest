@@ -42,7 +42,6 @@ class UsersTable extends Table
         $this->setPrimaryKey('id');
 
         // IMPORTANTE: Agregar estos behaviors
-        $this->addBehavior('Authentication.Password'); // Para hashear passwords automáticamente
         $this->addBehavior('Timestamp'); // Para created/modified automático
     }
 
