@@ -18,7 +18,7 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\User $user
  * @property \App\Model\Entity\Reactivo[] $reactivos
  */
-class Examenes extends Entity
+class Examen extends Entity
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().

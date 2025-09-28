@@ -12,6 +12,13 @@
     </div>
 
     <div class="examenes-grid">
+
+      <?= $this->Html->link(
+            '🚪 Logout',
+            ['controller' => 'Users', 'action' => 'logout'],
+            ['class' => 'btn btn-danger', 'style' => 'margin:10px; display:inline-block; padding:10px 20px; background:#dc3545; color:#fff; border-radius:6px; text-decoration:none;']
+        ) ?>
+        
         <?php if (!empty($examenes->toArray())): ?>
             <?php foreach ($examenes as $examen): ?>
                 <div class="examen-card">

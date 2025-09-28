@@ -49,5 +49,6 @@ class Reactivo extends Entity
         'created' => true,
         'modified' => true,
         'user' => true,
+        'examenes' => true, // Permitir asignación masiva para la relación con Examenes
     ];
 }

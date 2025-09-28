@@ -169,4 +169,11 @@ class ExamenesController extends AppController
 
         $this->set(compact('examen', 'respuestas'));
     }
+
+     public function logout()
+    {
+        $this->Authentication->logout();
+        $this->Flash->success(__('Has cerrado sesión.'));
+        return $this->redirect(['action' => 'login']);
+    }
 }
