@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Controller\AppController;
-
+ use Authentication\PasswordHasher\DefaultPasswordHasher;
 class UsersController extends AppController
 {
     public function index()
@@ -59,31 +59,7 @@ class UsersController extends AppController
         return $this->redirect(['action' => 'index']);
     }
 
-    public function login()
-    {
-        $this->request->allowMethod(['get', 'post']);
-        $result = $this->Authentication->getResult();
 
-        if ($result->isValid()) {
-            $identity = $this->Authentication->getIdentity();
-
-            // Redirección según el rol
-            if ($identity->get('role') === 'admin') {
-                $this->Flash->success(__('Bienvenido Administrador!'));
-                return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
-            } elseif ($identity->get('role') === 'estudiante') {
-                $this->Flash->success(__('Bienvenido Estudiante!'));
-                return $this->redirect(['controller' => 'Examenes', 'action' => 'disponibles']);
-            } else {
-                $this->Flash->success(__('Bienvenido Usuario!'));
-                return $this->redirect(['controller' => 'Examenes', 'action' => 'index']);
-            }
-        }
-
-        if ($this->request->is('post') && !$result->isValid()) {
-            $this->Flash->error(__('Usuario o contraseña incorrectos.'));
-        }
-    }
 
     public function logout()
     {
@@ -92,6 +68,72 @@ class UsersController extends AppController
         return $this->redirect(['action' => 'login']);
     }
 
+
+    public function login()
+{
+    $this->request->allowMethod(['get', 'post']);
+    $result = $this->Authentication->getResult();
+
+    // DEBUG: Mostrar información cuando se envía el formulario
+    if ($this->request->is('post')) {
+        echo '<div style="background: #f8f9fa; padding: 20px; border: 1px solid #ddd; margin: 20px 0;">';
+        echo '<h3>Debug de Login:</h3>';
+        echo '<p><strong>Email enviado:</strong> ' . $this->request->getData('email') . '</p>';
+        echo '<p><strong>Password enviado:</strong> ' . $this->request->getData('password') . '</p>';
+        echo '<p><strong>Authentication Result Valid:</strong> ' . ($result->isValid() ? 'SÍ' : 'NO') . '</p>';
+        
+        if (!$result->isValid()) {
+            echo '<p><strong>Errores del resultado:</strong></p>';
+            debug($result->getErrors());
+            
+            // Verificar si el usuario existe en la base de datos
+            $user = $this->Users->find()
+                ->where(['email' => $this->request->getData('email')])
+                ->first();
+            
+            if ($user) {
+                echo '<p><strong>Usuario encontrado en DB:</strong> SÍ</p>';
+                echo '<p><strong>Email en DB:</strong> ' . $user->email . '</p>';
+                echo '<p><strong>Activo:</strong> ' . ($user->active ? 'SÍ' : 'NO') . '</p>';
+                echo '<p><strong>Role:</strong> ' . $user->role . '</p>';
+                echo '<p><strong>Hash en DB:</strong> ' . substr($user->password, 0, 30) . '...</p>';
+                
+                // Verificar manualmente el hash
+               
+                $hasher = new DefaultPasswordHasher();
+                $manualCheck = $hasher->check($this->request->getData('password'), $user->password);
+                echo '<p><strong>Verificación manual del hash:</strong> ' . ($manualCheck ? 'CORRECTO ✅' : 'INCORRECTO ❌') . '</p>';
+                
+            } else {
+                echo '<p><strong>Usuario encontrado en DB:</strong> NO ❌</p>';
+            }
+        } else {
+            echo '<p><strong>✅ Autenticación exitosa!</strong></p>';
+        }
+        echo '</div>';
+    }
+
+    if ($result->isValid()) {
+        $identity = $this->Authentication->getIdentity();
+
+        // Redirección según el rol
+        if ($identity->get('role') === 'admin') {
+            $this->Flash->success(__('Bienvenido Administrador!'));
+            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+        } elseif ($identity->get('role') === 'estudiante') {
+            $this->Flash->success(__('Bienvenido Estudiante!'));
+            return $this->redirect(['controller' => 'Examenes', 'action' => 'disponibles']);
+        } else {
+            $this->Flash->success(__('Bienvenido Usuario!'));
+            return $this->redirect(['controller' => 'Examenes', 'action' => 'index']);
+        }
+    }
+
+    if ($this->request->is('post') && !$result->isValid()) {
+        $this->Flash->error(__('Usuario o contraseña incorrectos.'));
+    }
+}
+    
     // MÉTODO TEMPORAL PARA CREAR USUARIO DE PRUEBA
     public function createTestUser()
     {
