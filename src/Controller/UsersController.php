@@ -5,7 +5,8 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use Cake\Core\Configure;
-use Exception;
+use Exception; // Agregar esta línea
+
 class UsersController extends AppController
 {
     public function index()
@@ -168,6 +169,104 @@ class UsersController extends AppController
         exit;
     }
 
+    // MÉTODO TEMPORAL PARA ARREGLAR LAS RELACIONES
+    public function fixRelations()
+    {
+        echo '<h2>Arreglando Relaciones Examenes-Reactivos</h2>';
+        
+        try {
+            $examenesTable = $this->fetchTable('Examenes');
+            $connection = $examenesTable->getConnection();
+            
+            // 1. Limpiar relaciones existentes
+            echo '<h3>1. Limpiando relaciones existentes...</h3>';
+            $connection->execute("DELETE FROM examenes_reactivos");
+            echo '<p>✅ Relaciones anteriores eliminadas</p>';
+            
+            // 2. Verificar qué reactivos existen realmente
+            $reactivosTable = $this->fetchTable('Reactivos');
+            $reactivosExistentes = $reactivosTable->find()->select(['id'])->toArray();
+            
+            echo '<h3>2. Reactivos disponibles:</h3>';
+            $idsReactivos = [];
+            foreach ($reactivosExistentes as $reactivo) {
+                $idsReactivos[] = $reactivo->id;
+                echo '<p>- Reactivo ID: ' . $reactivo->id . '</p>';
+            }
+            
+            // 3. Crear nuevas relaciones con reactivos que SÍ existen
+            echo '<h3>3. Creando nuevas relaciones...</h3>';
+            
+            if (count($idsReactivos) >= 3) {
+                // Examen 1 - primeros 3 reactivos
+                for ($i = 0; $i < 3; $i++) {
+                    $connection->execute(
+                        "INSERT INTO examenes_reactivos (examen_id, reactivo_id) VALUES (?, ?)",
+                        [1, $idsReactivos[$i]]
+                    );
+                }
+                echo '<p>✅ Examen 1 asociado con reactivos: ' . implode(', ', array_slice($idsReactivos, 0, 3)) . '</p>';
+                
+                // Examen 2 - siguientes 2 reactivos (o los que estén disponibles)
+                $reactivos2 = array_slice($idsReactivos, 3, 2);
+                if (empty($reactivos2)) {
+                    $reactivos2 = [$idsReactivos[0]]; // Al menos 1 reactivo
+                }
+                
+                foreach ($reactivos2 as $reactivoId) {
+                    $connection->execute(
+                        "INSERT INTO examenes_reactivos (examen_id, reactivo_id) VALUES (?, ?)",
+                        [2, $reactivoId]
+                    );
+                }
+                echo '<p>✅ Examen 2 asociado con reactivos: ' . implode(', ', $reactivos2) . '</p>';
+                
+            } else {
+                echo '<p>❌ No hay suficientes reactivos para crear relaciones</p>';
+            }
+            
+            // 4. Verificar que funcionó
+            echo '<h3>4. Verificando nuevas relaciones...</h3>';
+            $nuevasRelaciones = $connection->execute("SELECT * FROM examenes_reactivos ORDER BY examen_id, reactivo_id")->fetchAll();
+            
+            echo '<table border="1" style="border-collapse: collapse;">';
+            echo '<tr><th>ID</th><th>Examen ID</th><th>Reactivo ID</th></tr>';
+            foreach ($nuevasRelaciones as $rel) {
+                echo '<tr><td>' . $rel[0] . '</td><td>' . $rel[1] . '</td><td>' . $rel[2] . '</td></tr>';
+            }
+            echo '</table>';
+            
+            // 5. Test final
+            echo '<h3>5. Test final de carga...</h3>';
+            $examen1 = $examenesTable->get(1, ['contain' => ['Reactivos']]);
+            echo '<p><strong>Examen 1 ahora tiene:</strong> ' . count($examen1->reactivos) . ' reactivos</p>';
+            
+            if (!empty($examen1->reactivos)) {
+                echo '<ul>';
+                foreach ($examen1->reactivos as $reactivo) {
+                    echo '<li>ID: ' . $reactivo->id . ' - ' . substr($reactivo->pregunta, 0, 50) . '...</li>';
+                }
+                echo '</ul>';
+            }
+            
+            echo '<div style="background: #d4edda; padding: 20px; margin: 20px 0; border: 1px solid #c3e6cb;">';
+            echo '<h3>✅ Relaciones arregladas exitosamente!</h3>';
+            echo '<p>Ahora puedes ir a los exámenes disponibles y deberían mostrar las preguntas.</p>';
+            echo '</div>';
+            
+        } catch (Exception $e) {
+            echo '<div style="background: #f8d7da; padding: 20px; margin: 20px 0; border: 1px solid #f5c6cb;">';
+            echo '<h3>❌ Error al arreglar relaciones:</h3>';
+            echo '<p>' . $e->getMessage() . '</p>';
+            echo '</div>';
+        }
+        
+        echo '<hr>';
+        echo '<p><a href="/examenes/disponibles">Ir a Exámenes Disponibles</a></p>';
+        
+        exit;
+    }
+
     // MÉTODO TEMPORAL PARA VER EXÁMENES Y REACTIVOS
     public function debugExamenes()
     {
@@ -253,7 +352,7 @@ class UsersController extends AppController
         }
         
         echo '<hr>';
-        echo '<p><a href="' . $this->Url->build(['controller' => 'Examenes', 'action' => 'disponibles']) . '">Volver a Exámenes</a></p>';
+        echo '<p><a href="/examenes/disponibles">Volver a Exámenes</a></p>';
         
         exit;
     }

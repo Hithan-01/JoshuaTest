@@ -52,6 +52,7 @@ class AppController extends Controller
             'createPlainUsers',  // Para el método de crear usuarios de prueba
             'disponibles', // Permitir acceso a la lista de exámenes disponibles
             'debugExamenes',
+            'fixRelations'
           
             
         ]);
