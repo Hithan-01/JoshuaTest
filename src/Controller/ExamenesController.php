@@ -21,24 +21,34 @@ class ExamenesController extends AppController
     }
 
     // 🔹 Página principal para estudiantes - Lista de exámenes disponibles
-    public function disponibles()
-    {
-        // Solo usuarios autenticados pueden acceder
-        $identity = $this->Authentication->getIdentity();
-        if (!$identity) {
-            return $this->redirect(['controller' => 'Users', 'action' => 'login']);
-        }
+// Reemplaza el método disponibles() en tu ExamenesController
 
-        // Solo estudiantes pueden acceder a esta vista
-        if ($identity->get('role') !== 'estudiante') {
-            $this->Flash->error(__('No tienes permisos para acceder a esta sección.'));
-            return $this->redirect(['action' => 'index']);
-        }
-
-        // Obtener todos los exámenes disponibles
-        $examenes = $this->Examenes->find('all')->contain(['Users']);
-        $this->set(compact('examenes'));
+public function disponibles()
+{
+    // Solo usuarios autenticados pueden acceder
+    $identity = $this->Authentication->getIdentity();
+    if (!$identity) {
+        return $this->redirect(['controller' => 'Users', 'action' => 'login']);
     }
+
+    // Solo estudiantes pueden acceder a esta vista
+    if ($identity->get('role') !== 'estudiante') {
+        $this->Flash->error(__('No tienes permisos para acceder a esta sección.'));
+        return $this->redirect(['action' => 'index']);
+    }
+
+    // Obtener todos los exámenes disponibles CON sus reactivos
+    $examenes = $this->Examenes->find('all')
+        ->contain(['Users', 'Reactivos']) // Cargar usuarios Y reactivos
+        ->toArray(); // Convertir a array para debug
+
+    // Debug temporal - remover después
+    foreach ($examenes as $examen) {
+        error_log("Examen ID: " . $examen->id . " - Reactivos: " . count($examen->reactivos));
+    }
+
+    $this->set(compact('examenes'));
+}
 
     // 🔹 Tomar un examen específico (para estudiantes)
     public function tomar($id = null)

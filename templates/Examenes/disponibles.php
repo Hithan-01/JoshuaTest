@@ -19,7 +19,7 @@
             ['class' => 'btn btn-danger', 'style' => 'margin:10px; display:inline-block; padding:10px 20px; background:#dc3545; color:#fff; border-radius:6px; text-decoration:none;']
         ) ?>
         
-        <?php if (!empty($examenes->toArray())): ?>
+        <?php if (!empty($examenes)): ?>
             <?php foreach ($examenes as $examen): ?>
                 <div class="examen-card">
                     <div class="card-header">
@@ -27,6 +27,9 @@
                         <small class="text-muted">
                             Autor: <?= h($examen->user->email ?? 'N/A') ?>
                         </small>
+                        <div class="questions-badge">
+                            <?= count($examen->reactivos ?? []) ?> preguntas
+                        </div>
                     </div>
                     
                     <div class="card-body">
@@ -43,15 +46,33 @@
                     </div>
                     
                     <div class="card-actions">
-                        <?= $this->Html->link(
-                            '<i class="fas fa-play-circle"></i> Comenzar Examen',
-                            ['action' => 'tomar', $examen->id],
-                            [
-                                'class' => 'btn btn-primary btn-block',
-                                'escape' => false,
-                                'confirm' => '¿Estás listo para comenzar este examen? Una vez que inicies, deberás completarlo.'
-                            ]
-                        ) ?>
+                        <?php if (!empty($examen->reactivos)): ?>
+                            <?= $this->Html->link(
+                                '<i class="fas fa-play-circle"></i> Comenzar Examen',
+                                ['action' => 'tomar', $examen->id],
+                                [
+                                    'class' => 'btn btn-primary btn-block',
+                                    'escape' => false,
+                                    'confirm' => '¿Estás listo para comenzar este examen? Una vez que inicies, deberás completarlo.'
+                                ]
+                            ) ?>
+                        <?php else: ?>
+                            <button class="btn btn-secondary btn-block" disabled>
+                                Este examen no tiene preguntas disponibles
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Debug temporal - remover después -->
+                    <div style="background: #f8f9fa; padding: 10px; font-size: 12px; border-top: 1px solid #dee2e6;">
+                        <strong>Debug:</strong> 
+                        ID: <?= $examen->id ?> | 
+                        Reactivos cargados: <?= count($examen->reactivos ?? []) ?> |
+                        <?php if (!empty($examen->reactivos)): ?>
+                            Primeros IDs: <?= implode(', ', array_slice(array_column($examen->reactivos, 'id'), 0, 3)) ?>
+                        <?php else: ?>
+                            Sin reactivos
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -109,12 +130,24 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 20px;
+    position: relative;
 }
 
 .card-title {
     margin: 0 0 8px 0;
     font-weight: 600;
     font-size: 1.2em;
+}
+
+.questions-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    backdrop-filter: blur(10px);
 }
 
 .card-body {
@@ -153,6 +186,15 @@
 .btn-primary:hover {
     background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
     transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    border: none;
+    padding: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    color: white;
 }
 
 .btn-block {
